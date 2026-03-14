@@ -12,3 +12,4 @@ def add_income(operation: OperationRequest):
 @router.post("/operations/expense")
 def add_expense(operation: OperationRequest):
     return operations_service.add_expense(operation)
+
