@@ -33,7 +33,7 @@ def get_all_wallets(db: Session, ) -> list[Wallet]:
 
 
 
-def create_wallet(db: Session, wallet_name: str, amount: float) -> Wallet:
+def create_wallet(db: Session, wallet_name: str, amount: Decimal) -> Wallet:
     wallet = Wallet(name=wallet_name, balance=amount)
     db.add(wallet)
     db.flush()
