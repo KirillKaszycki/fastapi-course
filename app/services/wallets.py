@@ -1,28 +1,35 @@
+from decimal import Decimal
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.enum import CurrencyEnum
 from app.models import User
 from app.repository import wallets as wallets_repository
-from app.schemas import CreateWalletRequest, WalletResponse
+from app.schemas import CreateWalletRequest, WalletResponse, TotalBalance
+from app.services import exchange_service
 
 
-def get_wallet(
+async def get_total_balance(
         db: Session,
-        current_user: User,
-        wallet_name: str | None = None
+        current_user: User
     ):
-    if wallet_name is None:
-        wallets = wallets_repository.get_all_wallets(db, current_user.id)
-        return {"total_balance": sum([w.balance for w in wallets])}
+    """
+    :param db:
+    :param current_user:
+    :return: total balance
+    """
 
-    if not wallets_repository.is_wallet_exists(db, current_user.id, wallet_name):
-        raise HTTPException(
-            status_code=404,
-            detail=f"Wallet '{wallet_name}' not found"
-        )
+    wallets = wallets_repository.get_all_wallets(db, current_user.id)
+    total_balance = Decimal(0)
+    for wallet in wallets:
+        if wallet.currency == CurrencyEnum.RUB:
+            total_balance += wallet.balance
+        else:
+            exchange_rate = await exchange_service.get_exchange_rate(wallet.currency, CurrencyEnum.RUB)
+            total_balance += exchange_rate * wallet.balance
 
-    wallet = wallets_repository.get_wallet_balance_by_name(db, current_user.id, wallet_name)
-    return {"wallet": wallet.name, "balance": wallet.balance}
+    return TotalBalance(total_balance=total_balance)
 
 
 def create_wallet(
@@ -30,6 +37,12 @@ def create_wallet(
         current_user: User,
         wallet: CreateWalletRequest
     ) -> WalletResponse:
+    """
+    :param db:
+    :param current_user:
+    :param wallet:
+    :return: created wallet
+    """
     if wallets_repository.is_wallet_exists(db, current_user.id, wallet.name):
         raise HTTPException(
             status_code=400,
@@ -45,3 +58,16 @@ def create_wallet(
     )
     db.commit()
     return WalletResponse.model_validate(wallet)
+
+
+def get_all_wallets(
+        db: Session,
+        current_user: User
+    ) -> list[WalletResponse]:
+    """
+    :param db:
+    :param current_user:
+    :return: all wallets list
+    """
+    wallets = wallets_repository.get_all_wallets(db, current_user.id)
+    return [WalletResponse.model_validate(wallet) for wallet in wallets]

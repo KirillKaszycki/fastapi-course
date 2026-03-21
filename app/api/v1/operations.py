@@ -16,6 +16,13 @@ def add_income(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
     ):
+    """
+    :param operation:
+    :param db:
+    :param current_user:
+    :return: additional income from service layer
+    """
+
     return operations_service.add_income(db, current_user, operation)
 
 
@@ -25,6 +32,13 @@ def add_expense(
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
     ):
+    """
+    :param operation:
+    :param operation:
+    :param db:
+    :param current_user:
+    :return: additional expense from service layer
+    """
     return operations_service.add_expense(db, current_user, operation)
 
 
@@ -36,16 +50,30 @@ def get_operations_list(
         user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
     ):
+    """
+    :param wallet_id:
+    :param date_from:
+    :param date_to:
+    :param user:
+    :param db:
+    :return: list of all the operations from service layer
+    """
     return operations_service.get_operations_list(db, user, wallet_id, date_from, date_to)
 
 
 @router.post("/operations/transfer", response_model=OperationResponse)
-def create_transfer(
+async def create_transfer(
         payload: TransferCreateSchema,
         user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
 ):
-    return operations_service.transfer_between_wallets(
+    """
+    :param payload:
+    :param user:
+    :param db:
+    :return: transfer between wallets from service layer
+    """
+    return await operations_service.transfer_between_wallets(
         db,
         user.id,
         payload.from_wallet_id,

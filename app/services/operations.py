@@ -17,7 +17,12 @@ def add_income(
         current_user: User,
         operation: OperationRequest
     ) -> OperationResponse:
-
+    """
+    :param db:
+    :param current_user:
+    :param operation:
+    :return: adds income operation
+    """
     if not wallets_repository.is_wallet_exists(db, current_user.id, operation.wallet_name):
         raise HTTPException(
             status_code=404,
@@ -42,6 +47,12 @@ def add_expense(
         current_user: User,
         operation: OperationRequest
     ) -> OperationResponse:
+    """
+    :param db:
+    :param current_user:
+    :param operation:
+    :return: adds expense operation
+    """
     if not wallets_repository.is_wallet_exists(db, current_user.id, operation.wallet_name):
         raise HTTPException(
             status_code=404,
@@ -74,7 +85,14 @@ def get_operations_list(
         date_from: datetime | None = None,
         date_to: datetime | None = None,
     ) -> list[OperationResponse]:
-
+    """
+    :param db:
+    :param current_user:
+    :param wallet_id:
+    :param date_from:
+    :param date_to:
+    :return: returns the list of operations
+    """
     if wallet_id:
         wallet = wallets_repository.get_wallet_by_id(db, current_user.id, wallet_id)
         if not wallet:
@@ -101,13 +119,22 @@ def get_operations_list(
     return result
 
 
-def transfer_between_wallets(
+async def transfer_between_wallets(
         db: Session,
         user_id: int,
         from_wallet_id: int,
         to_wallet_id: int,
         amount: Decimal,
     ) -> OperationResponse:
+    """
+    :param db:
+    :param user_id:
+    :param from_wallet_id:
+    :param to_wallet_id:
+    :param amount:
+    :return: makes transfer between wallets
+    """
+
     from_wallet = wallets_repository.get_wallet_by_id(db, user_id, from_wallet_id)
     to_wallet = wallets_repository.get_wallet_by_id(db, user_id, to_wallet_id)
 
@@ -125,7 +152,7 @@ def transfer_between_wallets(
 
     target_amount = amount
     if from_wallet.currency != to_wallet.currency:
-        exchange_rate = get_exchange_rate(
+        exchange_rate = await get_exchange_rate(
             from_wallet.currency,
             to_wallet.currency,
         )
@@ -138,7 +165,7 @@ def transfer_between_wallets(
         wallet_id=from_wallet.id,
         type=OperationType.TRANSFER,
         amount=target_amount,
-        currency=from_wallet.currency,
+        currency=to_wallet.currency,
         category="transfer",
     )
     db.add(from_wallet)

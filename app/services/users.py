@@ -6,6 +6,12 @@ from app.schemas import UserResponse
 
 
 def create_user(db: Session, login: str) -> UserResponse:
+    """
+    Creates a new user
+    :param db:
+    :param login:
+    :return: new user
+    """
     if users_repository.get_user(db, login):
         raise HTTPException(
             status_code=400,
