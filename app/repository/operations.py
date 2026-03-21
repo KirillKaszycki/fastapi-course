@@ -16,6 +16,16 @@ def create_operation(
         category: str | None = None,
         subcategory: str | None = None,
 ) -> Operation:
+    """
+    :param db:
+    :param wallet_id:
+    :param type:
+    :param amount:
+    :param currency:
+    :param category:
+    :param subcategory:
+    :return: writes the operation to db
+    """
     operation = Operation(
         wallet_id=wallet_id,
         type=type,
@@ -35,6 +45,13 @@ def get_operations_list(
         date_from: datetime | None = None,
         date_to: datetime | None = None,
 ) -> list[Operation]:
+    """
+    :param db:
+    :param wallet_ids:
+    :param date_from:
+    :param date_to:
+    :return: gets operations list from db
+    """
     query = db.query(Operation).filter(Operation.wallet_id.in_(wallet_ids))
 
     if date_from:
@@ -44,5 +61,3 @@ def get_operations_list(
         query = query.filter(Operation.created_at <= date_to)
 
     return query.all()
-
-

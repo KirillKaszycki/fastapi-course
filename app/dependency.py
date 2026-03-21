@@ -10,6 +10,9 @@ from app.repository import users as user_repository
 security = HTTPBearer()
 
 def get_db() -> Generator[Session, None, None]:
+    """
+    Get db session
+    """
     db = SessionLocal()
     try:
         yield db
@@ -20,7 +23,13 @@ def get_db() -> Generator[Session, None, None]:
 def get_current_user(
         credentials: HTTPAuthorizationCredentials = Depends(security),
         db: Session = Depends(get_db)
-        ) -> User:
+    ) -> User:
+    """
+    Get current user
+    :param credentials:
+    :param db:
+    :return: user
+    """
     login = credentials.credentials
 
     user = user_repository.get_user(db, login)
