@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from app.enum import CurrencyEnum
 from app.models import User, Wallet
 
 
@@ -9,7 +10,7 @@ def test_add_expense_success(db_session, client):
     db_session.add(user)
     db_session.flush()
 
-    wallet = Wallet(name='card', balance=200, user_id=user.id)
+    wallet = Wallet(name='card', balance=200, user_id=user.id, currency=CurrencyEnum.RUB)
     db_session.add(wallet)
     db_session.commit()
     db_session.refresh(wallet)
@@ -19,6 +20,7 @@ def test_add_expense_success(db_session, client):
         json={
             "wallet_name": "card",
             "amount": 50.0,
+            "category": "food",
             "description": "food",
         },
         headers={
@@ -27,11 +29,16 @@ def test_add_expense_success(db_session, client):
     )
 
     assert response.status_code == 200
-    assert response.json()["message"] == "Expense added"
-    assert response.json()["wallet"] == wallet.name
-    assert Decimal(str(response.json()["amount"])) == Decimal(50)
-    assert Decimal(str(response.json()["new_balance"])) == Decimal(150)
-    assert response.json()["description"] == "food"
+    payload = response.json()
+    assert payload["wallet_id"] == wallet.id
+    assert payload["type"] == "expense"
+    assert Decimal(payload["amount"]) == Decimal(50)
+    assert payload["currency"] == CurrencyEnum.RUB
+    assert payload["category"] == "food"
+    assert payload["description"] == "food"
+
+    db_session.refresh(wallet)
+    assert wallet.balance == Decimal(150)
 
 
 def test_add_expense_negative_amount(db_session, client):
@@ -39,7 +46,7 @@ def test_add_expense_negative_amount(db_session, client):
     db_session.add(user)
     db_session.flush()
 
-    wallet = Wallet(name='card', balance=200, user_id=user.id)
+    wallet = Wallet(name='card', balance=200, user_id=user.id, currency=CurrencyEnum.RUB)
     db_session.add(wallet)
     db_session.commit()
     db_session.refresh(wallet)
@@ -64,7 +71,7 @@ def test_add_expense_empty_name(db_session, client):
     db_session.add(user)
     db_session.flush()
 
-    wallet = Wallet(name='card', balance=200, user_id=user.id)
+    wallet = Wallet(name='card', balance=200, user_id=user.id, currency=CurrencyEnum.RUB)
     db_session.add(wallet)
     db_session.commit()
     db_session.refresh(wallet)
@@ -125,7 +132,7 @@ def test_add_expense_not_enough_money(db_session, client):
     db_session.add(user)
     db_session.flush()
 
-    wallet = Wallet(name='card', balance=200, user_id=user.id)
+    wallet = Wallet(name='card', balance=200, user_id=user.id, currency=CurrencyEnum.RUB)
     db_session.add(wallet)
     db_session.commit()
     db_session.refresh(wallet)
@@ -151,7 +158,7 @@ def test_add_income_success(db_session, client):
     db_session.add(user)
     db_session.flush()
 
-    wallet = Wallet(name='card', balance=200, user_id=user.id)
+    wallet = Wallet(name='card', balance=200, user_id=user.id, currency=CurrencyEnum.RUB)
     db_session.add(wallet)
     db_session.commit()
     db_session.refresh(wallet)
@@ -161,6 +168,7 @@ def test_add_income_success(db_session, client):
         json={
             "wallet_name": "card",
             "amount": 50.0,
+            "category": "food",
             "description": "food",
         },
         headers={
@@ -169,11 +177,16 @@ def test_add_income_success(db_session, client):
     )
 
     assert response.status_code == 200
-    assert response.json()["message"] == "Income added"
-    assert response.json()["wallet"] == wallet.name
-    assert Decimal(str(response.json()["amount"])) == Decimal(50)
-    assert Decimal(str(response.json()["new_balance"])) == Decimal(250)
-    assert response.json()["description"] == "food"
+    payload = response.json()
+    assert payload["wallet_id"] == wallet.id
+    assert payload["type"] == "income"
+    assert Decimal(payload["amount"]) == Decimal(50)
+    assert payload["currency"] == CurrencyEnum.RUB
+    assert payload["category"] == "food"
+    assert payload["description"] == "food"
+
+    db_session.refresh(wallet)
+    assert wallet.balance == Decimal(250)
 
 
 def test_add_income_negative_amount(db_session, client):
@@ -181,7 +194,7 @@ def test_add_income_negative_amount(db_session, client):
     db_session.add(user)
     db_session.flush()
 
-    wallet = Wallet(name='card', balance=200, user_id=user.id)
+    wallet = Wallet(name='card', balance=200, user_id=user.id, currency=CurrencyEnum.RUB)
     db_session.add(wallet)
     db_session.commit()
     db_session.refresh(wallet)
@@ -206,7 +219,7 @@ def test_add_income_empty_name(db_session, client):
     db_session.add(user)
     db_session.flush()
 
-    wallet = Wallet(name='card', balance=200, user_id=user.id)
+    wallet = Wallet(name='card', balance=200, user_id=user.id, currency=CurrencyEnum.RUB)
     db_session.add(wallet)
     db_session.commit()
     db_session.refresh(wallet)

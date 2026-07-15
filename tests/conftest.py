@@ -1,4 +1,8 @@
+import os
 from typing import Generator
+
+TEST_DATABASE_URL = "sqlite:///./test.db"
+os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 
 import pytest
 from sqlalchemy.orm import sessionmaker, Session
@@ -9,7 +13,6 @@ from app.database import Base
 from main import app
 from app.dependency import get_db
 
-TEST_DATABASE_URL = "sqlite:///./test.db"
 engine = create_engine(TEST_DATABASE_URL)
 
 test_engine = create_engine(
