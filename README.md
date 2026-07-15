@@ -29,6 +29,27 @@ uvicorn main:app --reload
 #### Stop server
 Hotkeys: control + c
 
+### Run with Docker
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+The API is available at `http://localhost:8000`, and Docker PostgreSQL is available at
+`localhost:5433`. Change `POSTGRES_PASSWORD` in `.env` before using this setup
+outside local development. Stop containers with:
+
+```bash
+docker compose down
+```
+
+To also delete the PostgreSQL data volume:
+
+```bash
+docker compose down -v
+```
+
 ### 4. Tree
 
 - **API (router) layer:**\
