@@ -9,6 +9,7 @@ from app.enum import CurrencyEnum
 class OperationRequest(BaseModel):
     wallet_name: str = Field(..., max_length=127)
     amount: Decimal
+    category: str | None = Field(None, max_length=255)
     description: str | None = Field(None, max_length=255)
 
     @field_validator('amount')
@@ -82,7 +83,7 @@ class OperationResponse(BaseModel):
     amount: Decimal
     currency: CurrencyEnum
     category: str | None
-    subcategory: str | None
+    description: str | None
     created_at: datetime
 
 

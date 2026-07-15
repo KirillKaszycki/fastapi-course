@@ -14,7 +14,7 @@ def create_operation(
         amount: Decimal,
         currency: CurrencyEnum,
         category: str | None = None,
-        subcategory: str | None = None,
+        description: str | None = None,
 ) -> Operation:
     """
     :param db:
@@ -23,7 +23,7 @@ def create_operation(
     :param amount:
     :param currency:
     :param category:
-    :param subcategory:
+    :param description:
     :return: writes the operation to db
     """
     operation = Operation(
@@ -32,7 +32,7 @@ def create_operation(
         amount=amount,
         currency=currency,
         category=category,
-        subcategory=subcategory,
+        description=description,
     )
     db.add(operation)
     db.flush()

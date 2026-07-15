@@ -34,5 +34,5 @@ class Operation(Base):
     amount: Mapped[Decimal]
     currency: Mapped[CurrencyEnum]
     category: Mapped[str | None] = mapped_column(default=None)
-    subcategory: Mapped[str | None] = mapped_column(default=None)
+    description: Mapped[str | None] = mapped_column(default=None)
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now())
